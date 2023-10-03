@@ -1,0 +1,5 @@
+{
+  "tenantUrl": "https://your-domain.id.forgerock.io",
+  "apiKey": "thisisyourapikey",
+  "apiSecret": "thisisyourapisecret"
+}
