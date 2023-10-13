@@ -40,6 +40,10 @@ forgelogs -s am -b 2023-10-01T00:00:00Z -d 2d --all-trees
 forgelogs -s am -b 2023-10-01T00:00:00Z -d 2d
 ```
 
+### Try it out
+
+Download in the **Releases** section, or click [here](https://github.com/constantiux/forgelogs/releases).
+
 ### Build this project
 
 **Note**: This is optional.
