@@ -19,6 +19,7 @@ var GenerateLogsCookieCounter int = 0
 var LogRequestFullDuration float64
 var OriginalEndTime time.Time
 var CurrentLastFetchedTimestamp time.Time
+var LogFileTimestamp string
 
 func CheckError(e error) {
 	if e != nil {
@@ -37,7 +38,7 @@ func CheckGenerateLogProgress() {
 }
 
 func GenerateQueryFilter(Config ConfigData) string {
-	if (len(Config.FrTreeName) == 0) && !Config.FailedOnlyFlag {
+	if (len(Config.FrTreeName) == 0) && !Config.FilterTreesFlag && !Config.AllTreesFlag {
 		return ""
 	} else {
 		var TreeFilter string = "/payload/entries/info/treeName pr"
@@ -156,7 +157,7 @@ func GenerateLogs(Config ConfigData) {
 	fmt.Println()
 	log.Printf("Analysing logs..\n")
 
-	if (len(Config.FrTreeName) != 0) || Config.FailedOnlyFlag {
+	if (len(Config.FrTreeName) != 0) || Config.FilterTreesFlag || Config.AllTreesFlag {
 		GenerateReport(Config)
 	}
 
@@ -167,13 +168,16 @@ func GenerateLogs(Config ConfigData) {
 	body, err := json.MarshalIndent(OutputLog, "", "  ")
 	CheckError(err)
 
-	FullFileName := OutFileName + "_" + strconv.Itoa(int(time.Now().Unix()))
+	if len(LogFileTimestamp) == 0 {
+		LogFileTimestamp = strconv.Itoa(int(time.Now().Unix()))
+	}
+	FullFileName := OutFileName + "_" + LogFileTimestamp
 	if err := os.WriteFile(FullFileName+".json", body, os.ModePerm); err != nil {
 		log.Fatal(err)
 	}
 
 	fmt.Println("")
-	log.Printf("Total log entries: %v\n", OutputLog.ResultCount)
+	log.Printf("Total raw log entries: %v\n", OutputLog.ResultCount)
 	log.Printf("Output file %v has been successfully generated.\n", FullFileName+".json")
 	log.Printf("Total time elapsed: %v\n", TotalTimeElapsed)
 }

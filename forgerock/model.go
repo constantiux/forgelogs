@@ -5,14 +5,18 @@ import (
 )
 
 type ConfigData struct {
-	TenantUrl      *string `json:"tenantUrl,omitempty"`
-	ApiKey         *string `json:"apiKey,omitempty"`
-	ApiSecret      *string `json:"apiSecret,omitempty"`
-	FrSource       string
-	BeginTime      time.Time
-	EndTime        time.Time
-	FrTreeName     string
-	FailedOnlyFlag bool
+	TenantUrl       *string   `json:"tenantUrl,omitempty"`
+	ApiKey          *string   `json:"apiKey,omitempty"`
+	ApiSecret       *string   `json:"apiSecret,omitempty"`
+	FrTrees         *[]string `json:"trees"`
+	FrSource        string
+	BeginTime       time.Time
+	EndTime         time.Time
+	FrTreeName      string
+	FailedOnlyFlag  bool
+	TransactionFlag bool
+	FilterTreesFlag bool
+	AllTreesFlag    bool
 }
 
 type ForgeRockLogModel struct {

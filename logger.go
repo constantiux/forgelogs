@@ -31,14 +31,21 @@ func LoadConfigFile() {
 	if Config.TenantUrl == nil || Config.ApiKey == nil || Config.ApiSecret == nil {
 		log.Fatalln("Config file is corrupted, should contain tenantUrl, apiKey, and apiSecret")
 	}
+	// Check if AllTreesFlag is on and required config is present
+	if Config.FrTrees == nil && Config.FilterTreesFlag {
+		log.Fatalln("Config file is missing \"trees\", required as --filter-trees is specified")
+	}
 }
 
-func LoadForgerockConfig(FrTreeName string, FailedOnlyFlag bool) {
+func LoadForgerockConfig(FrTreeName string, FailedOnlyFlag bool, TransactionFlag bool, FilterTreesFlag bool, AllTreesFlag bool) {
 	Config.FrSource = myparser.FrSource
 	Config.BeginTime = myparser.BeginTime
 	Config.EndTime = myparser.EndTime
 	Config.FrTreeName = FrTreeName
 	Config.FailedOnlyFlag = FailedOnlyFlag
+	Config.TransactionFlag = TransactionFlag
+	Config.FilterTreesFlag = FilterTreesFlag
+	Config.AllTreesFlag = AllTreesFlag
 }
 
 func main() {
@@ -61,6 +68,12 @@ func main() {
 
 	var FailedOnlyFlag *bool = parser.Flag("", "failed-only", &argparse.Options{Required: false, Help: "Specify if only require failed results"})
 
+	var TransactionFlag *bool = parser.Flag("", "detailed", &argparse.Options{Required: false, Help: "Specify if only require details on failed results"})
+
+	var FilterTreesFlag *bool = parser.Flag("", "filter-trees", &argparse.Options{Required: false, Help: "Specify if require logging on selected journeys"})
+
+	var AllTreesFlag *bool = parser.Flag("", "all-trees", &argparse.Options{Required: false, Help: "Specify if require logging on all journeys"})
+
 	// Parse input
 	err := parser.Parse(os.Args)
 	if err != nil {
@@ -71,10 +84,21 @@ func main() {
 		os.Exit(0)
 	}
 
-	LoadForgerockConfig(*FrTreeName, *FailedOnlyFlag)
+	// Unload parsed user inputs to config
+	LoadForgerockConfig(*FrTreeName, *FailedOnlyFlag, *TransactionFlag, *FilterTreesFlag, *AllTreesFlag)
 
-	// Check if config file exists
+	// Check if user-defined config file exists
 	LoadConfigFile()
+
+	if *FrTreeName != "" && (*FilterTreesFlag || *AllTreesFlag) {
+		log.Println("Reminder: the individual tree specified is overwriting the other option(s)")
+	} else if *FilterTreesFlag && *AllTreesFlag {
+		log.Println("Reminder: --filter-trees is overwriting --all-trees")
+	}
+
+	if *FailedOnlyFlag && *FrTreeName == "" && !*FilterTreesFlag && !*AllTreesFlag {
+		log.Println("Reminder: --failed-only is ignored as no tree is specified")
+	}
 
 	// Initiate script
 	log.Println("Tenant:", *Config.TenantUrl)
